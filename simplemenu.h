@@ -4,7 +4,6 @@
 #include <conio.h>
 #include <vector>
 #include <string>
-#include <conio.h>
 
 
 #ifndef CLS_H
@@ -45,8 +44,8 @@ void cls(HANDLE hConsole)
 #ifndef SIMPLEMENUDISPLAY_H
 #define SIMPLEMENUDISPLAY_H
 
-template<class T, class T2, class T3>
-int simplemenudisplay(std::vector<bool> menu, T menuoptions[], T2 & amountofoptions, T3 & cursorposition)
+template<class T, class T2, class T3, class T4 = char*>
+int simplemenudisplay(std::vector<bool> menu, const T menuoptions[], T2 amountofoptions, T3 cursorposition, T4 header = "")
 {
 	char uicursor[2]{ ' ', '*' };
 	char input{};
@@ -56,20 +55,21 @@ int simplemenudisplay(std::vector<bool> menu, T menuoptions[], T2 & amountofopti
 	{
 
 		cls(hStdout);
+		if (header != "") { std::cout << header << "\n"; };
 		std::cout << "------------------------------------------------------------\n";
-			for (auto i = 0; i < amountofoptions; i++)
+		for (T2 i = 0; i <= amountofoptions; i++)
+		{
+			if (i == amountofoptions)
 			{
-				if (i == amountofoptions - 1)
-				{
-					std::cout << "------------------------------------------------------------\n"
-						<< "[" << uicursor[menu.at(i)] << "] " << menuoptions[i] << "\n";
-				}
-				else
-				{
-					std::cout << "[" << uicursor[menu.at(i)] << "] " << menuoptions[i] << "\n";
-				}
-
+				std::cout << "------------------------------------------------------------\n"
+					<< "[" << uicursor[menu.at(i)] << "] Back\\Exit\n";
 			}
+			else
+			{
+				std::cout << "[" << uicursor[menu.at(i)] << "] " << menuoptions[i] << "\n";
+			}
+
+		}
 		input = _getch();
 		if (input == '0' || input == '0xE0') { input = _getch(); };		//arrow keys are precieded either by 0 or 0xE0 in input
 		switch (input)
@@ -79,14 +79,12 @@ int simplemenudisplay(std::vector<bool> menu, T menuoptions[], T2 & amountofopti
 			menu[cursorposition - 1] = menu[cursorposition];
 			menu[cursorposition] = 0;
 			cursorposition -= 1;
-			return(simplemenudisplay(menu, menuoptions, amountofoptions, cursorposition));
 		}; }; break;
-		case 80: {if (cursorposition != amountofoptions - 1)			//down arrow
+		case 80: {if (cursorposition != amountofoptions)			//down arrow
 		{
 			menu[cursorposition + 1] = menu[cursorposition];
 			menu[cursorposition] = 0;
 			cursorposition += 1;
-			return(simplemenudisplay(menu, menuoptions, amountofoptions, cursorposition));
 
 		}; }; break;
 		case '\r':									//enter
@@ -95,8 +93,7 @@ int simplemenudisplay(std::vector<bool> menu, T menuoptions[], T2 & amountofopti
 		}; break;
 		default: break;
 		};
-	} while (input != 27);
-
+	} while (input != 27 || input != amountofoptions);
 	return 27;
 };
 
@@ -106,51 +103,30 @@ int simplemenudisplay(std::vector<bool> menu, T menuoptions[], T2 & amountofopti
 #ifndef SIMPLEMENU_H
 #define SIMPLEMENU_H
 
-template<class T, class T2>
-int simplemenu(T optionstodisplay[], T2 & amountofoptions)
-{
-	std::vector<bool> menu(1);	//temporary vector remembering position of cursor
-	menu.at(0) = 1;					//initializing cursor position at 1st element
-	for (auto i = 0; i < amountofoptions; i++)
-	{
-		menu.push_back(0);
-	};
-	int cursorpos = 0;
-	cursorpos = simplemenudisplay(menu, optionstodisplay, amountofoptions, cursorpos);
-	return cursorpos;
-};
-
-template<class T, class T2>
-int simplemenu(T optionstodisplay[], T2 amountofoptions)
-{
-	std::vector<bool> menu(1);	//temporary vector remembering position of cursor
-	menu.at(0) = 1;					//initializing cursor position at 1st element
-	/*
-	
-	*/
-
-
-	for (auto i = 0; i < amountofoptions; i++)
-	{
-		menu.push_back(0);
-	};
-	int cursorpos = 0;
-	cursorpos = simplemenudisplay(menu, optionstodisplay, amountofoptions, cursorpos);
-	return cursorpos;
-}
-
 template<class T>
 int simplemenu(T & optionstodisplay)
 {
 	//TODO: calculate amount of options
 	std::vector<bool> menu(1);	//temporary vector remembering position of cursor
 	menu.at(0) = 1;					//initializing cursor position at 1st element
-	for (auto i = 0; i < (sizeof(optionstodisplay)/sizeof(*optionstodisplay)); i++)
+	for (auto i = 0; i <= (sizeof(optionstodisplay) / sizeof(*optionstodisplay)); i++, menu.push_back(0));		//extra element for "back\exit"
+	int cursorpos = 0;
+	cursorpos = simplemenudisplay(menu, optionstodisplay, (sizeof(optionstodisplay) / sizeof(*optionstodisplay)), cursorpos);
+	return cursorpos;
+}
+
+template<class T, class T2>
+int simplemenu(T & optionstodisplay, T2 & header)
+{
+	//TODO: calculate amount of options
+	std::vector<bool> menu(1);	//temporary vector remembering position of cursor
+	menu.at(0) = 1;					//initializing cursor position at 1st element
+	for (auto i = 0; i < (sizeof(optionstodisplay) / sizeof(*optionstodisplay)); i++)
 	{
 		menu.push_back(0);
 	};
 	int cursorpos = 0;
-	cursorpos = simplemenudisplay(menu, optionstodisplay, (sizeof(optionstodisplay) / sizeof(*optionstodisplay)), cursorpos);
+	cursorpos = simplemenudisplay(menu, optionstodisplay, (sizeof(optionstodisplay) / sizeof(*optionstodisplay)), cursorpos, header);
 	return cursorpos;
 }
 #endif // !SIMPLEMENU_H
