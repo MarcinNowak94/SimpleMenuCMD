@@ -79,13 +79,24 @@ int simplemenudisplay(std::vector<bool> menu, const T menuoptions[], T2 amountof
 			menu[cursorposition - 1] = menu[cursorposition];
 			menu[cursorposition] = 0;
 			cursorposition -= 1;
+		}
+		else
+		{
+			menu[cursorposition] = 0;
+			menu[amountofoptions] = 1;
+			cursorposition = amountofoptions;
 		}; }; break;
 		case 80: {if (cursorposition != amountofoptions)			//down arrow
 		{
 			menu[cursorposition + 1] = menu[cursorposition];
 			menu[cursorposition] = 0;
 			cursorposition += 1;
-
+		}
+		else
+		{
+			menu[cursorposition] = 0;
+			menu[0] = 1;
+			cursorposition = 0;
 		}; }; break;
 		case '\r':									//enter
 		{
